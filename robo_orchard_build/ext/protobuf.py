@@ -16,7 +16,7 @@
 
 import os
 import subprocess
-from typing import List, Optional, Set, Type
+from typing import List, Optional, Set, Type, cast
 
 import google.protobuf.message
 from google.protobuf.descriptor import FileDescriptor
@@ -46,7 +46,10 @@ def _build_file_descriptor_set(
         file_descriptor.CopyToProto(hd)  # type: ignore
 
     for message_class in message_classes:
-        append_file_descriptor(message_class.DESCRIPTOR.file)
+        # Python and upb descriptors expose the same public descriptor API.
+        append_file_descriptor(
+            cast(FileDescriptor, message_class.DESCRIPTOR.file)
+        )
     return file_descriptor_set
 
 

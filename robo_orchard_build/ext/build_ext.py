@@ -117,6 +117,12 @@ class RoboOrcahrdExtension(Extension):
         pass
 
     def build(self, build_ext: "RoboOrchardBuildExt"):
+        """Build the complete custom extension, including output placement.
+
+        Subclasses own compilation and linking. After this method succeeds,
+        the command does not run the ordinary setuptools compiler for this
+        extension. Lifecycle hooks are managed by the command's ``run()``.
+        """
         if self.SKIP_RUN:
             raise RuntimeError("This extension should not be run")
 
@@ -134,6 +140,14 @@ class RoboOrcahrdExtension(Extension):
 
 
 class RoboOrchardBuildExt(build_ext):
+    """Run custom builds alongside ordinary setuptools extensions.
+
+    Custom extensions own their complete build through ``build()``. Their
+    ``before_run()`` hook runs before the build command and ``after_run()``
+    runs after that command succeeds. ``SKIP_RUN`` extensions run only those
+    hooks. Build failures propagate without running the remaining hooks.
+    """
+
     def run(self):
         if not self.extensions:
             return
@@ -156,7 +170,9 @@ class RoboOrchardBuildExt(build_ext):
                 ext.after_run()
 
     def build_extension(self, ext: Extension) -> None:
+        """Dispatch each extension to its custom or setuptools builder."""
         if isinstance(ext, RoboOrcahrdExtension):
             assert ext.SKIP_RUN is False, "SKIP_RUN must be False"
             ext.build(self)
+            return
         super(RoboOrchardBuildExt, self).build_extension(ext)
