@@ -44,4 +44,6 @@ isort
 # build
 packaging>=25.0
 twine>=6.1.0
+# Keep the upload toolchain compatible with urllib3 2.x.
+requests-toolbelt>=1.0.0
 setuptools>=77.0.3
